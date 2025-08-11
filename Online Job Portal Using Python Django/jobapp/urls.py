@@ -23,6 +23,12 @@ urlpatterns = [
     path('dashboard/employer/close/<int:id>/', views.make_complete_job_view, name='complete'),
     path('dashboard/employer/delete/<int:id>/', views.delete_job_view, name='delete'),
     path('dashboard/employee/delete-bookmark/<int:id>/', views.delete_bookmark_view, name='delete-bookmark'),
+    # urls.py
+path('applicant/<int:id>/accept/', views.accept_applicant, name='accept-applicant'),
+path('applicant/<int:id>/reject/', views.reject_applicant, name='reject-applicant'),
+path('products/', views.product_list, name='product_list'),
+   
+
 
 
 ]

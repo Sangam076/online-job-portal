@@ -2,24 +2,17 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
-
 from .models import User
 
 
 class AddUserForm(forms.ModelForm):
-    """
-    New User Form. Requires password confirmation.
-    """
-    password1 = forms.CharField(
-        label='Password', widget=forms.PasswordInput
-    )
-    password2 = forms.CharField(
-        label='Confirm password', widget=forms.PasswordInput
-    )
+    """New User Form. Requires password confirmation."""
+    password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
+    password2 = forms.CharField(label='Confirm password', widget=forms.PasswordInput)
 
     class Meta:
         model = User
-        fields = ('email', 'first_name', 'last_name', 'gender', 'role' )
+        fields = ('email', 'first_name', 'last_name', 'gender', 'role')
 
     def clean_password2(self):
         # Check that the two password entries match
@@ -39,20 +32,20 @@ class AddUserForm(forms.ModelForm):
 
 
 class UpdateUserForm(forms.ModelForm):
-    """
-    Update User Form. Doesn't allow changing password in the Admin.
-    """
+    """Update User Form. Doesn't allow changing password in the Admin."""
     password = ReadOnlyPasswordHashField()
 
     class Meta:
         model = User
         fields = (
-            'email', 'password', 'first_name', 'gender', 'role', 'last_name', 'is_active',
-            'is_staff', 'location', 'skills', 'MobileNumber', 'Xth', 'XIIth', 'UG', 'PG', 'Experience', 'AcademicProjects'
+            'email', 'password', 'first_name', 'gender', 'role', 'last_name',
+            'is_active', 'is_staff', 'is_superuser', 'location', 'skills',
+            'MobileNumber', 'Xth', 'XIIth', 'UG', 'PG', 'Experience', 'AcademicProjects',
+            'groups', 'user_permissions'
         )
 
     def clean_password(self):
-# Password can't be changed in the admin
+        # Password can't be changed in the admin
         return self.initial["password"]
 
 
@@ -60,28 +53,42 @@ class UserAdmin(BaseUserAdmin):
     form = UpdateUserForm
     add_form = AddUserForm
 
-    list_display = ('email', 'first_name', 'last_name', 'gender', 'role', 'is_staff', 'skills', 'MobileNumber', 'Xth', 'XIIth', 'UG', 'PG', 'Experience', 'AcademicProjects')
-    list_filter = ('is_staff', )
+    list_display = (
+        'email', 'first_name', 'last_name', 'gender', 'role',
+        'is_staff', 'is_superuser', 'skills', 'MobileNumber', 'Xth', 'XIIth', 'UG', 'PG',
+        'Experience', 'AcademicProjects'
+    )
+    list_filter = ('is_staff', 'is_superuser')
+
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'gender', 'role', 'location', 'skills', 'MobileNumber', 'Xth', 'XIIth', 'UG', 'PG', 'Experience', 'AcademicProjects' )}),
-        ('Permissions', {'fields': ('is_active', 'is_staff')}),
+        ('Personal info', {
+            'fields': (
+                'first_name', 'last_name', 'gender', 'role', 'location', 'skills',
+                'MobileNumber', 'Xth', 'XIIth', 'UG', 'PG', 'Experience', 'AcademicProjects'
+            )
+        }),
+        ('Permissions', {
+            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
+        }),
     )
+
     add_fieldsets = (
-        (
-            None,
-            {
-                'classes': ('wide',),
-                'fields': (
-                    'email', 'first_name', 'last_name', 'gender', 'role', 'password1',
-                    'password2', 'location', 'skills', 'MobileNumber', 'Xth', 'XIIth', 'UG', 'PG', 'Experience', 'AcademicProjects'
-                )
-            }
-        ),
+        (None, {
+            'classes': ('wide',),
+            'fields': (
+                'email', 'first_name', 'last_name', 'gender', 'role',
+                'password1', 'password2', 'location', 'skills', 'MobileNumber', 'Xth',
+                'XIIth', 'UG', 'PG', 'Experience', 'AcademicProjects',
+                'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'
+            ),
+        }),
     )
+
     search_fields = ('email', 'first_name', 'last_name')
     ordering = ('email', 'first_name', 'last_name')
-    filter_horizontal = ()
+    filter_horizontal = ('groups', 'user_permissions')
 
 
 admin.site.register(User, UserAdmin)
+ 

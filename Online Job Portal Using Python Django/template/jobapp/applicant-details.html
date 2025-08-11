@@ -5,7 +5,7 @@
 
 
     <!-- HOME -->
-    <section class="section-hero overlay inner-page bg-image" style="background-image: url(/static/images/hero_4.jpg);" id="home-section">
+    <section class="section-hero overlay inner-page bg-image" style="background-image: url(/static/images/bg.jpg);" id="home-section">
       <div class="container">
         <div class="row">
           <div class="col-md-7">
@@ -19,36 +19,50 @@
       </div>
     </section>
 
-    <section class="site-section block__18514" id="next-section">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-3 mr-auto"></div>
-          <div class="col-lg-8">
-            <span class="text-primary d-block mb-5"><span class="icon-user-circle display-1"></span></span>
-            <p><strong class="text-black">Name  :</strong> {{ applicant.get_full_name }}</p>
-            <p><strong class="text-black">Email  :</strong> {{ applicant.email }}</p>
-            <p><strong class="text-black">Mobile Number  :</strong> {{ applicant.MobileNumber }}</p>
-            <p><strong class="text-black">Gender  :</strong>
-                {% if applicant.gender == 'M' %}
-                    Male
-                {% else %}
-                    Female
-                {% endif %}
-            </p>
-            <p><strong class="text-black">Location  :</strong> {{ applicant.location }}</p>
-            <p><strong class="text-black">Skills  :</strong> {{ applicant.skills }}</p>
-            <p><strong class="text-black">X th  :</strong> {{ applicant.Xth }}</p>
-            <p><strong class="text-black">XII th  :</strong> {{ applicant.XIIth }}</p>
-            <p><strong class="text-black">Under Graduate  :</strong> {{ applicant.UG }}</p>
-            <p><strong class="text-black">Post Graduate  :</strong> {{ applicant.PG }}</p>
-            <p><strong class="text-black">Experience  :</strong> {{ applicant.Experience }}</p>
-            <p><strong class="text-black">Academic Projects  :</strong> {{ applicant.AcademicProjects }}</p>
-            <p><a href="mailto:{{ applicant.email }}" class="btn btn-primary btn-md mt-4">Contact</a></p>
-          </div>
-        </div>
+<section class="site-section block__18514" id="next-section">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-3 mr-auto"></div>
+      <div class="col-lg-8">
+        <span class="text-primary d-block mb-5">
+          <span class="icon-user-circle display-1"></span>
+        </span>
+        <p><strong class="text-black">Name  :</strong> {{ applicant.get_full_name }}</p>
+        <p><strong class="text-black">Email  :</strong> {{ applicant.email }}</p>
+        <p><strong class="text-black">Mobile Number  :</strong> {{ applicant.MobileNumber }}</p>
+        <p><strong class="text-black">Gender  :</strong>
+            {% if applicant.gender == 'M' %}
+                Male
+            {% else %}
+                Female
+            {% endif %}
+        </p>
+        <p><strong class="text-black">Location  :</strong> {{ applicant.location }}</p>
+        <p><strong class="text-black">Skills  :</strong> {{ applicant.skills }}</p>
+        <p><strong class="text-black">X th  :</strong> {{ applicant.Xth }}</p>
+        <p><strong class="text-black">XII th  :</strong> {{ applicant.XIIth }}</p>
+        <p><strong class="text-black">Under Graduate  :</strong> {{ applicant.UG }}</p>
+        <p><strong class="text-black">Post Graduate  :</strong> {{ applicant.PG }}</p>
+        <p><strong class="text-black">Experience  :</strong> {{ applicant.Experience }}</p>
+        <p><strong class="text-black">Academic Projects  :</strong> {{ applicant.AcademicProjects }}</p>
+
+        <!-- Resume Section -->
+        <p><strong class="text-black">Resume :</strong>
+            {% if applicant.resume %}
+                <a href="{{ applicant.resume.url }}" target="_blank" class="btn btn-outline-primary btn-sm">View Resume</a>
+            {% else %}
+                <span>No resume uploaded.</span>
+            {% endif %}
+        </p>
+
+        <p>
+          <a href="mailto:{{ applicant.email }}" class="btn btn-primary btn-md mt-4">Contact</a>
+        </p>
       </div>
-    </section>
-    
+    </div>
+  </div>
+</section>
+   
 
 
 {% endblock %}

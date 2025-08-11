@@ -330,6 +330,26 @@ def applicant_details_view(request, id):
 
     return render(request, 'jobapp/applicant-details.html', context)
 
+# views.py
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+
+@login_required
+@user_is_employer
+def accept_applicant(request, id):
+    applicant = get_object_or_404(Applicant, id=id)
+    applicant.status = 'accepted'
+    applicant.save()
+    return redirect(reverse('jobapp:applicants', args=[applicant.job.id]))
+
+@login_required
+@user_is_employer
+def reject_applicant(request, id):
+    applicant = get_object_or_404(Applicant, id=id)
+    applicant.status = 'rejected'
+    applicant.save()
+    return redirect(reverse('jobapp:applicants', args=[applicant.job.id]))
 
 @login_required(login_url=reverse_lazy('account:login'))
 @user_is_employee
@@ -420,3 +440,96 @@ def contact(request):
            fail_silently=False,
         )
     return render(request, "jobapp/contact.html", context)
+
+
+from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator
+from django.db.models import Q
+from .models import Product, ProductCategory, Brand
+from .forms import ProductFilterForm, ProductSearchForm
+
+def product_list(request):
+    products = Product.objects.filter(is_available=True)
+    
+    # Handle search
+    search_form = ProductSearchForm(request.GET)
+    if search_form.is_valid() and search_form.cleaned_data['search']:
+        search_query = search_form.cleaned_data['search']
+        products = products.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(category__name__icontains=search_query) |
+            Q(brand__name__icontains=search_query)
+        )
+    
+    # Handle filters
+    filter_form = ProductFilterForm(request.GET)
+    if filter_form.is_valid():
+        if filter_form.cleaned_data['category']:
+            products = products.filter(category=filter_form.cleaned_data['category'])
+        
+        if filter_form.cleaned_data['brand']:
+            products = products.filter(brand=filter_form.cleaned_data['brand'])
+        
+        if filter_form.cleaned_data['price_range']:
+            price_range = filter_form.cleaned_data['price_range']
+            if price_range == '0-50':
+                products = products.filter(price__lte=50)
+            elif price_range == '50-100':
+                products = products.filter(price__gte=50, price__lte=100)
+            elif price_range == '100-200':
+                products = products.filter(price__gte=100, price__lte=200)
+            elif price_range == '200+':
+                products = products.filter(price__gte=200)
+        
+        if filter_form.cleaned_data['sizes']:
+            products = products.filter(sizes=filter_form.cleaned_data['sizes'])
+        
+        if filter_form.cleaned_data['colors']:
+            products = products.filter(colors=filter_form.cleaned_data['colors'])
+        
+        # Handle sorting
+        if filter_form.cleaned_data['sort_by']:
+            sort_field = filter_form.cleaned_data['sort_by']
+            if sort_field in ['price', '-price']:
+                # Sort by actual price (considering discounted price)
+                products = sorted(products, 
+                    key=lambda x: x.get_price, 
+                    reverse=sort_field.startswith('-'))
+                # Convert back to QuerySet for pagination
+                product_ids = [p.id for p in products]
+                products = Product.objects.filter(id__in=product_ids)
+                if sort_field.startswith('-'):
+                    products = products.order_by('-price')
+                else:
+                    products = products.order_by('price')
+            else:
+                products = products.order_by(sort_field)
+    
+    # Pagination
+    paginator = Paginator(products, 12)  # 12 products per page (6 rows of 2)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'products': page_obj,
+        'search_form': search_form,
+        'filter_form': filter_form,
+        'total_products': products.count(),
+    }
+    
+    return render(request, 'jobapp/products/product_list.html', context)
+
+def product_detail(request, slug):
+    product = get_object_or_404(Product, slug=slug, is_available=True)
+    related_products = Product.objects.filter(
+        category=product.category, 
+        is_available=True
+    ).exclude(id=product.id)[:4]
+    
+    context = {
+        'product': product,
+        'related_products': related_products,
+    }
+    
+    return render(request, 'products/product_detail.html', context)

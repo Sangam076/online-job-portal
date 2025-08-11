@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'taggit',
     'user_visit',
     'debug_toolbar',
+    "widget_tweaks",
 ]
 
 MIDDLEWARE = [

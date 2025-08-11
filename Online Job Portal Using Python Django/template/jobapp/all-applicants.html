@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<section class="section-hero overlay inner-page bg-image" style="background-image: url(/static/images/hero_4.jpg);"
+<section class="section-hero overlay inner-page bg-image" style="background-image: url(/static/images/bg.jpg);"
     id="home-section">
     <div class="container">
         <div class="row">
@@ -29,25 +29,47 @@
                                     <th>Name</th>
                                     <th>Job Title</th>
                                     <th>Applied Date</th>
-                                    <th>View </th>
-                        
+                                    <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for applicant in all_applicants %}
-                        {{ applicant.get_total_applicant }}
-
                                 <tr>
-                                    <td class="text-center"><a href="">{{ applicant.user.get_full_name }}</a></td     >
+                                    <td class="text-center">
+                                        <a href="">{{ applicant.user.get_full_name }}</a>
+                                    </td>
                                     <td>{{ applicant.job.title }}</td>
                                     <td>{{ applicant.timestamp }}</td>
                                     <td>
-                                        <a class="btn btn-info btn-sm" href="{% url 'jobapp:applicant-details' applicant.user.id %}"
-                                                role="button">
-                                            Click
-                                        </a>
+                                        {% if applicant.status == 'pending' %}
+                                            <span class="badge badge-warning">Pending</span>
+                                        {% elif applicant.status == 'accepted' %}
+                                            <span class="badge badge-success">Accepted</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">Rejected</span>
+                                        {% endif %}
                                     </td>
+                                    <td>
+                                        <a class="btn btn-info btn-sm"
+                                           href="{% url 'jobapp:applicant-details' applicant.user.id %}">
+                                           View
+                                        </a>
+                                        
+                                        {% if applicant.status != 'accepted' %}
+                                            <a class="btn btn-success btn-sm"
+                                               href="{% url 'jobapp:accept-applicant' applicant.id %}">
+                                               Accept
+                                            </a>
+                                        {% endif %}
 
+                                        {% if applicant.status != 'rejected' %}
+                                            <a class="btn btn-danger btn-sm"
+                                               href="{% url 'jobapp:reject-applicant' applicant.id %}">
+                                               Reject
+                                            </a>
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -57,7 +79,7 @@
             </div>
         </div>
     </div>
-
 </section>
+
 
 {% endblock %}

@@ -5,12 +5,16 @@ from django.contrib.auth.forms import UserCreationForm
 from account.models import User
 
 
+
+
 class EmployeeRegistrationForm(UserCreationForm):
 
-
     def __init__(self, *args, **kwargs):
-        UserCreationForm.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)  # cleaner than calling UserCreationForm.__init__
+
         self.fields['gender'].required = True
+
+        # Labels
         self.fields['first_name'].label = "First Name :"
         self.fields['last_name'].label = "Last Name :"
         self.fields['password1'].label = "Password :"
@@ -26,89 +30,37 @@ class EmployeeRegistrationForm(UserCreationForm):
         self.fields['PG'].label = "Post Graduate :"
         self.fields['Experience'].label = "Experience :"
         self.fields['AcademicProjects'].label = "Academic Projects :"
+        self.fields['resume'].label = "Upload Resume :"
 
-        self.fields['first_name'].widget.attrs.update(
-            {
-                'placeholder': 'Enter First Name',
-            }
-        )
-        self.fields['last_name'].widget.attrs.update(
-            {
-                'placeholder': 'Enter Last Name',
-            }
-        )
-        self.fields['email'].widget.attrs.update(
-            {
-                'placeholder': 'Enter Email',
-            }
-        )
-        self.fields['password1'].widget.attrs.update(
-            {
-                'placeholder': 'Enter Password',
-            }
-        )
-        self.fields['password2'].widget.attrs.update(
-            {
-                'placeholder': 'Confirm Password',
-            }
-        )
-        self.fields['location'].widget.attrs.update(
-            {
-                'placeholder': '',
-            }
-        )
-        self.fields['skills'].widget.attrs.update(
-            {
-                'placeholder': '',
-            }
-        )
-        self.fields['MobileNumber'].widget.attrs.update(
-            {
-                'placeholder': '',
-            }
-        )
-        self.fields['Xth'].widget.attrs.update(
-            {
-                'placeholder': '',
-            }
-        )
-        self.fields['XIIth'].widget.attrs.update(
-            {
-                'placeholder': '',
-            }
-        )
-        self.fields['UG'].widget.attrs.update(
-            {
-                'placeholder': '',
-            }
-        )
-        self.fields['PG'].widget.attrs.update(
-            {
-                'placeholder': '',
-            }
-        )
-        self.fields['Experience'].widget.attrs.update(
-            {
-                'placeholder': '',
-            }
-        )
-        self.fields['AcademicProjects'].widget.attrs.update(
-            {
-                'placeholder': '',
-            }
-        )
-        self.fields['AcademicProjects'].widget.attrs.update(
-            {
-                'placeholder': '',
-            }
-        )
-        
+        # Placeholders
+        placeholders = {
+            'first_name': 'Enter First Name',
+            'last_name': 'Enter Last Name',
+            'email': 'Enter Email',
+            'password1': 'Enter Password',
+            'password2': 'Confirm Password',
+            'location': '',
+            'skills': '',
+            'MobileNumber': '',
+            'Xth': '',
+            'XIIth': '',
+            'UG': '',
+            'PG': '',
+            'Experience': '',
+            'AcademicProjects': '',
+            'resume': 'Upload Resume File'
+        }
+
+        for field_name, placeholder in placeholders.items():
+            self.fields[field_name].widget.attrs.update({'placeholder': placeholder})
 
     class Meta:
-
-        model=User
-
-        fields = ['first_name', 'last_name', 'gender', 'email', 'password1', 'password2','location', 'skills', 'MobileNumber', 'Xth', 'XIIth', 'UG', 'PG', 'Experience', 'AcademicProjects']
+        model = User
+        fields = [
+            'first_name', 'last_name', 'gender', 'email', 'password1', 'password2',
+            'location', 'skills', 'MobileNumber', 'Xth', 'XIIth', 'UG', 'PG',
+            'Experience', 'AcademicProjects', 'resume'
+        ]
 
     def clean_gender(self):
         gender = self.cleaned_data.get('gender')
@@ -117,12 +69,11 @@ class EmployeeRegistrationForm(UserCreationForm):
         return gender
 
     def save(self, commit=True):
-        user = UserCreationForm.save(self,commit=False)
+        user = super().save(commit=False)
         user.role = "employee"
         if commit:
             user.save()
         return user
-
 
 class EmployerRegistrationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
@@ -226,7 +177,16 @@ class EmployeeProfileEditForm(forms.ModelForm):
                 'placeholder': '*************',
             }
         )
+        self.fields['resume'].widget.attrs.update(
+            {
+                'accept': '.pdf,.doc,.docx',  # restrict file types
+            }
+        )
 
     class Meta:
-        model = User
-        fields = ["first_name", "last_name", "gender", "location", "skills", "MobileNumber", "Xth", "XIIth", "UG", "PG", "Experience", "AcademicProjects"]
+        model = User  # Ensure this model actually has a 'resume' FileField
+        fields = [
+            "first_name", "last_name", "gender", "location", "skills",
+            "MobileNumber", "Xth", "XIIth", "UG", "PG", "Experience",
+            "AcademicProjects", "resume"  # <-- Added here
+        ]

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from django.core.validators import FileExtensionValidator
 from account.managers import CustomUserManager
 
 JOB_TYPE = (
@@ -31,7 +31,13 @@ class User(AbstractUser):
     PG = models.CharField( max_length=200)
     Experience = models.CharField( max_length=200)
     AcademicProjects = models.CharField( max_length=200) 
-
+    resume = models.FileField(
+    upload_to='resumes/',
+    blank=True,
+    null=True,
+    validators=[FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx'])],
+    help_text="Upload your resume (PDF/DOC/DOCX)"
+)
 
 
 

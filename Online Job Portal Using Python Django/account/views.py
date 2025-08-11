@@ -6,7 +6,8 @@ from django.shortcuts import render, redirect , get_object_or_404
 from django.urls import reverse, reverse_lazy
 
 from account.forms import *
-from jobapp.permission import user_is_employee 
+from jobapp.permission import user_is_employee, user_is_employer
+
 
 
 def get_success_url(request):
@@ -28,14 +29,18 @@ def employee_registration(request):
     Handle Employee Registration
 
     """
-    form = EmployeeRegistrationForm(request.POST or None)
-    if form.is_valid():
-        form = form.save()
-        return redirect('account:login')
+    if request.method == "POST":
+        form = EmployeeRegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            form = form.save()
+            return redirect('account:login')
+    else:
+        form = EmployeeRegistrationForm()
     context={
         
             'form':form
         }
+    
 
     return render(request,'account/employee-registration.html',context)
 
@@ -61,27 +66,28 @@ def employer_registration(request):
 
 @login_required(login_url=reverse_lazy('accounts:login'))
 @user_is_employee
-def employee_edit_profile(request, id=id):
-
+def employee_edit_profile(request, id):
     """
     Handle Employee Profile Update Functionality
-
     """
-
     user = get_object_or_404(User, id=id)
-    form = EmployeeProfileEditForm(request.POST or None, instance=user)
-    if form.is_valid():
-        form = form.save()
-        messages.success(request, 'Your Profile Was Successfully Updated!')
-        return redirect(reverse("account:edit-profile", kwargs={
-                                    'id': form.id
-                                    }))
-    context={
-        
-            'form':form
-        }
+    
+    if request.method == "POST":
+        form = EmployeeProfileEditForm(request.POST, request.FILES, instance=user)  # request.FILES added
+        if form.is_valid():
+            updated_user = form.save()
+            messages.success(request, 'Your Profile Was Successfully Updated!')
+            return redirect(reverse("account:edit-profile", kwargs={
+                'id': updated_user.id
+            }))
+    else:
+        form = EmployeeProfileEditForm(instance=user)
 
-    return render(request,'account/employee-edit-profile.html',context)
+    context = {
+        'form': form
+    }
+    return render(request, 'account/employee-edit-profile.html', context)
+
 
 
 

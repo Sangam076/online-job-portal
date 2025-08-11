@@ -280,3 +280,84 @@ class JobEditForm(forms.ModelForm):
             job.save()
         return job
 
+from django import forms
+from .models import Product, ProductCategory, Brand
+
+class ProductFilterForm(forms.Form):
+    PRICE_CHOICES = [
+        ('', 'All Prices'),
+        ('0-50', 'Under $50'),
+        ('50-100', '$50 - $100'),
+        ('100-200', '$100 - $200'),
+        ('200+', 'Over $200'),
+    ]
+    
+    SORT_CHOICES = [
+        ('name', 'Name (A-Z)'),
+        ('-name', 'Name (Z-A)'),
+        ('price', 'Price (Low to High)'),
+        ('-price', 'Price (High to Low)'),
+        ('-created_at', 'Newest First'),
+        ('created_at', 'Oldest First'),
+    ]
+    
+    category = forms.ModelChoiceField(
+        queryset=ProductCategory.objects.all(),
+        required=False,
+        empty_label="All Categories",
+        widget=forms.Select(attrs={
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+        })
+    )
+    
+    brand = forms.ModelChoiceField(
+        queryset=Brand.objects.all(),
+        required=False,
+        empty_label="All Brands",
+        widget=forms.Select(attrs={
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+        })
+    )
+    
+    price_range = forms.ChoiceField(
+        choices=PRICE_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+        })
+    )
+    
+    sizes = forms.ChoiceField(
+        choices=[('', 'All Sizes')] + Product.SIZE_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+        })
+    )
+    
+    colors = forms.ChoiceField(
+        choices=[('', 'All Colors')] + Product.COLOR_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+        })
+    )
+    
+    sort_by = forms.ChoiceField(
+        choices=SORT_CHOICES,
+        required=False,
+        initial='-created_at',
+        widget=forms.Select(attrs={
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+        })
+    )
+
+class ProductSearchForm(forms.Form):
+    search = forms.CharField(
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'placeholder': 'Search products...'
+        })
+    )
